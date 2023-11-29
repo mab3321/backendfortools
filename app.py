@@ -1,13 +1,10 @@
 import os
-from google.cloud import storage
 import pandas as pd
 import random
 from flask import Flask, jsonify, request,send_file
 from flask_cors import CORS
 import csv
-from google.cloud import bigquery
 from consts.const import data_base_name
-client = bigquery.Client()
 from flask import Flask, send_file, request
 import firebase_admin
 from firebase_admin import credentials, storage
@@ -92,82 +89,82 @@ table_name = "products"
 #     res = Exec_Query(sql)
 #     return res
 
-def Exec_Query(query):
-    results = client.query(query)
-    df = results.to_dataframe()
-    result_dict = df.to_dict(orient='records')
-    return result_dict
+# def Exec_Query(query):
+#     results = client.query(query)
+#     df = results.to_dataframe()
+#     result_dict = df.to_dict(orient='records')
+#     return result_dict
 
-@app.route("/")
-def hello_world():
+# @app.route("/")
+# def hello_world():
 
-    # Construct SQL query
-    sql = f"SELECT * FROM `{data_base_name}.{table_name}` ORDER BY id LIMIT 1"
+#     # Construct SQL query
+#     sql = f"SELECT * FROM `{data_base_name}.{table_name}` ORDER BY id LIMIT 1"
 
-    # Execute query
-    original_result = Exec_Query(sql)
+#     # Execute query
+#     original_result = Exec_Query(sql)
 
-    return jsonify(original_result)
+#     return jsonify(original_result)
 
-@app.route("/api/search", methods=["GET"])
-def search_data():
-    # Get the query parameter from the request URL
-    query = request.args.get("query")
-    limit = int(request.args.get("limit"))
+# @app.route("/api/search", methods=["GET"])
+# def search_data():
+#     # Get the query parameter from the request URL
+#     query = request.args.get("query")
+#     limit = int(request.args.get("limit"))
 
-    if not query:
-        return jsonify([])
+#     if not query:
+#         return jsonify([])
 
-    # Construct a BigQuery SQL query to search for data
-    sql = f"""
-    SELECT *
-    FROM `{data_base_name}.{table_name}`
-    WHERE LOWER(Product_Title) LIKE LOWER('%{query}%')
-    OR LOWER(Description) LIKE LOWER('%{query}%')
-    LIMIT {limit}
-    """
-    res = Exec_Query(sql)
-    return res
-
-
-@app.route("/api/products", methods=["GET"])
-def get_product():
-    id = request.args.get("id")
-    if id:
-        sql = f"""SELECT
-                    *
-                    FROM
-                    `disney-a2b9f.Wp_Products.products`
-                    WHERE
-                    id = {id}"""
-
-        res = Exec_Query(sql)
-        return res
-    else:
-        return jsonify([])
+#     # Construct a BigQuery SQL query to search for data
+#     sql = f"""
+#     SELECT *
+#     FROM `{data_base_name}.{table_name}`
+#     WHERE LOWER(Product_Title) LIKE LOWER('%{query}%')
+#     OR LOWER(Description) LIKE LOWER('%{query}%')
+#     LIMIT {limit}
+#     """
+#     res = Exec_Query(sql)
+#     return res
 
 
-@app.route("/api/top_products", methods=["GET"])
-def top_product():
-    sql = """WITH ranked_products AS (
-                    SELECT
-                        *,
-                        ROW_NUMBER() OVER (PARTITION BY Category_id ORDER BY Category_id) AS rn
-                    FROM
-                        `disney-a2b9f.Wp_Products.products`
-                    )
+# @app.route("/api/products", methods=["GET"])
+# def get_product():
+#     id = request.args.get("id")
+#     if id:
+#         sql = f"""SELECT
+#                     *
+#                     FROM
+#                     `disney-a2b9f.Wp_Products.products`
+#                     WHERE
+#                     id = {id}"""
 
-                    SELECT
-                    *
-                    FROM
-                    ranked_products
-                    WHERE
-                    rn = 1
-                    ORDER BY
-                    category_id;"""
+#         res = Exec_Query(sql)
+#         return res
+#     else:
+#         return jsonify([])
+
+
+# @app.route("/api/top_products", methods=["GET"])
+# def top_product():
+#     sql = """WITH ranked_products AS (
+#                     SELECT
+#                         *,
+#                         ROW_NUMBER() OVER (PARTITION BY Category_id ORDER BY Category_id) AS rn
+#                     FROM
+#                         `disney-a2b9f.Wp_Products.products`
+#                     )
+
+#                     SELECT
+#                     *
+#                     FROM
+#                     ranked_products
+#                     WHERE
+#                     rn = 1
+#                     ORDER BY
+#                     category_id;"""
     
-    res = Exec_Query(sql)
-    return res
+#     res = Exec_Query(sql)
+#     return res
 
 
 @app.route('/return-files')
