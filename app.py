@@ -2,12 +2,44 @@ import os
 from google.cloud import storage
 import pandas as pd
 import random
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request,send_file
 from flask_cors import CORS
 import csv
 from google.cloud import bigquery
 from consts.const import data_base_name
 client = bigquery.Client()
+from flask import Flask, send_file, request
+import firebase_admin
+from firebase_admin import credentials, storage
+import io
+def download_file_from_storage(storage_bucket, file_path):
+    """
+    Downloads a file from Firebase Storage and returns its content.
+
+    Parameters:
+        - storage_bucket: The name of your Firebase Storage bucket.
+        - file_path: The path to the file in the bucket.
+    """
+
+    # Initialize Firebase with the credentials file
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase_admin.initialize_app(cred, {'storageBucket': storage_bucket})
+
+    # Create a storage client
+    storage_client = storage.bucket()
+
+    # Get a reference to the file
+    blob = storage_client.blob(file_path)
+
+    try:
+        # Download the file
+        file_content = blob.download_as_text()
+
+        # Return the file content
+        return file_content
+    except Exception as e:
+        return f"Error downloading file: {e}"
+
 
 
 app = Flask(__name__)
@@ -75,10 +107,7 @@ def hello_world():
     # Execute query
     original_result = Exec_Query(sql)
 
-    # Repeat the row ten times
-    repeated_result = [original_result[0].copy() for _ in range(30)]
-
-    return jsonify(repeated_result)
+    return jsonify(original_result)
 
 @app.route("/api/search", methods=["GET"])
 def search_data():
@@ -141,6 +170,27 @@ def top_product():
     return res
 
 
+@app.route('/return-files')
+def return_files_tut():
+    try:
+        # Get the 'name' parameter from the query string
+        file_name = request.args.get('name')
+
+        # Use the file_name in your logic
+        # For example, you can construct the file path based on the name
+        file_path = f'encrypted_data_netflix.txt'
+        
+        # Download the file content
+        file_content = download_file_from_storage("disney-a2b9f.appspot.com", file_path)
+
+        # Send the file content as a response
+        return send_file(
+            io.BytesIO(file_content.encode()),
+            attachment_filename=f"{file_name}.txt",
+            as_attachment=True
+        )
+    except Exception as e:
+        return str(e)
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=True, port=int(os.environ.get("PORT", 5000)))
