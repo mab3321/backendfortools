@@ -189,7 +189,7 @@ def return_files_tut():
         # Send the file content as a response
         return send_file(
             io.BytesIO(file_content.encode()),
-            attachment_filename=f"{file_name}.txt",
+            
             as_attachment=True
         )
     except Exception as e:
