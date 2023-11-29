@@ -178,7 +178,7 @@ def return_files_tut():
     try:
         # Get the 'name' parameter from the query string
         file_name = request.args.get('name')
-
+        print("File Name : ",file_name)
         # Use the file_name in your logic
         # For example, you can construct the file path based on the name
         file_path = f'encrypted_data_netflix.txt'
@@ -186,13 +186,18 @@ def return_files_tut():
         # Download the file content
         file_content = download_file_from_storage(file_path)
 
+        # Set the MIME type based on your file type
+        mimetype = 'application/octet-stream'  # Adjust this based on your file type
+
         # Send the file content as a response
         return send_file(
             io.BytesIO(file_content.encode()),
-            
-            as_attachment=True
+            attachment_filename=f"{file_name}.txt",
+            as_attachment=True,
+            mimetype=mimetype
         )
     except Exception as e:
+        # Handle exceptions appropriately (e.g., log the error)
         return str(e)
 
 if __name__ == "__main__":
