@@ -12,6 +12,7 @@ from flask import Flask, send_file, request
 import firebase_admin
 from firebase_admin import credentials, storage
 import io
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google_cred.json"
 def download_file_from_storage(storage_bucket, file_path):
     """
     Downloads a file from Firebase Storage and returns its content.
