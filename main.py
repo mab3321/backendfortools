@@ -2,6 +2,7 @@
 
 # Importing flask module in the project is mandatory
 # An object of Flask class is our WSGI application.
+import os
 from flask import Flask
 from flask import Flask, send_file, request
 from flask_cors import CORS
@@ -19,4 +20,4 @@ def hello_world():
  
 # main driver function
 if __name__ == "__main__":
-    app.run(debug=False,host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
+    app.run(debug=False,host='0.0.0.0', port=8080)
