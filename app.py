@@ -13,7 +13,8 @@ import firebase_admin
 from firebase_admin import credentials, storage
 import io
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google_cred.json"
-def download_file_from_storage(storage_bucket, file_path):
+storage_bucket = "disney-a2b9f.appspot.com"
+def download_file_from_storage(file_path):
     """
     Downloads a file from Firebase Storage and returns its content.
 
@@ -23,9 +24,7 @@ def download_file_from_storage(storage_bucket, file_path):
     """
 
     # Initialize Firebase with the credentials file
-    cred = credentials.Certificate("serviceAccountKey.json")
-    firebase_admin.initialize_app(cred, {'storageBucket': storage_bucket})
-
+    
     # Create a storage client
     storage_client = storage.bucket()
 
@@ -41,6 +40,9 @@ def download_file_from_storage(storage_bucket, file_path):
     except Exception as e:
         return f"Error downloading file: {e}"
 
+if not firebase_admin._apps:
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase_admin.initialize_app(cred, {'storageBucket': storage_bucket})
 
 
 app = Flask(__name__)
@@ -182,7 +184,7 @@ def return_files_tut():
         file_path = f'encrypted_data_netflix.txt'
         
         # Download the file content
-        file_content = download_file_from_storage("disney-a2b9f.appspot.com", file_path)
+        file_content = download_file_from_storage(file_path)
 
         # Send the file content as a response
         return send_file(
