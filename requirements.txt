@@ -7,3 +7,4 @@ pandas==1.4.4
 firebase-admin==6.2.0
 db-dtypes
 itsdangerous==2.0.1
+gunicorn
