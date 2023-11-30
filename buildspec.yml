@@ -2,11 +2,11 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      docker: 18
-  pre_build:
     commands:
       - echo "Login to Docker registry or ECR if needed"
+  pre_build:
+    commands:
+      - echo "Pre-build commands, if any"
   build:
     commands:
       - docker-compose build
@@ -14,3 +14,4 @@ phases:
   post_build:
     commands:
       - echo "Push Docker image to registry or ECR if needed"
+      - docker push mab3321/web:latest
