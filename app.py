@@ -104,13 +104,19 @@ def Exec_Query(query):
 @app.route("/")
 def hello_world():
 
-    # Construct SQL query
-    sql = f"SELECT * FROM `{data_base_name}.{table_name}` ORDER BY id LIMIT 1"
+    # Check if 'id' is present in the query parameters
+    id_param = request.args.get('id')
+    if id_param:
+        # If 'id' is present, construct a query for that specific id
+        sql = f"SELECT * FROM `{data_base_name}.{table_name}` WHERE id = {id_param}"
+    else:
+        # If 'id' is not present, use the original query
+        sql = f"SELECT * FROM `{data_base_name}.{table_name}` ORDER BY id LIMIT 1"
 
     # Execute query
-    original_result = Exec_Query(sql)
+    result = Exec_Query(sql)
 
-    return jsonify(original_result)
+    return jsonify(result)
 
 @app.route("/api/search", methods=["GET"])
 def search_data():
