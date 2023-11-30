@@ -10,7 +10,7 @@ phases:
   build:
     commands:
       - docker-compose build
-      - docker tag web:latest mab3321/web:latest
+      - docker tag flask:latest mab3321/flask:latest
   post_build:
     commands:
       - echo "Build phase complete"
