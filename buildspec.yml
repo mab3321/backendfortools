@@ -13,5 +13,4 @@ phases:
       - docker tag web:latest mab3321/web:latest
   post_build:
     commands:
-      - echo "Push Docker image to registry or ECR if needed"
-      - docker push mab3321/web:latest
+      - echo "Build phase complete"
