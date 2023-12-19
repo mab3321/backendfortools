@@ -34,7 +34,7 @@ def download_file_from_storage(file_path):
     try:
         # Download the file
         file_content = blob.download_as_text()
-
+        print(f"File content:\n{file_content}")
         # Return the file content
         return file_content
     except Exception as e:
@@ -184,11 +184,12 @@ def return_files_tut():
     try:
         # Get the 'name' parameter from the query string
         file_name = request.args.get('name')
-        print("File Name : ",file_name)
+        print("File Name: ", file_name)
+
         # Use the file_name in your logic
         # For example, you can construct the file path based on the name
-        file_path = f'encrypted_data_netflix.txt'
-        
+        file_path = 'encrypted_data_netflix.txt'
+
         # Download the file content
         file_content = download_file_from_storage(file_path)
 
@@ -198,13 +199,38 @@ def return_files_tut():
         # Send the file content as a response
         return send_file(
             io.BytesIO(file_content.encode()),
-            download_name=f"{file_name}.txt",
             as_attachment=True,
+            download_name=f"{file_name}.txt",  # Corrected argument name
             mimetype=mimetype
         )
     except Exception as e:
         # Handle exceptions appropriately (e.g., log the error)
         return str(e)
 
+@app.route("/api/add_product", methods=["POST"])
+def add_product():
+    try:
+        # Get the data from the request JSON
+        data = request.get_json()
+
+        # Validate the required fields in the data
+        required_fields = ["id", "name", "description", "hidden_text", "image_url"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        # Construct the BigQuery SQL query to insert the data
+        sql = f"""
+            INSERT INTO `{data_base_name}.{table_name}` (id, name, description, hidden_text, image_url)
+            VALUES ({data['id']}, '{data['name']}', '{data['description']}', '{data['hidden_text']}', '{data['image_url']}')
+        """
+
+        # Execute the query
+        res = Exec_Query(sql)
+
+        return jsonify({"message": res}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
-    app.run(debug=False,host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
+    app.run(debug=True,host='0.0.0.0', port=int(os.environ.get("PORT", 80000)))

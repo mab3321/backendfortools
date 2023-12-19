@@ -10,6 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+
 </head>
 
 <body>
@@ -37,14 +38,25 @@
     <label>Original message:</label>
     <div id="m3"></div>
   </div>
-
+  <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
   <script>
     var secret = "aRujnj7Nmm5RYRzIWswwx7nF6vJo6j4_S2doHbKsEhQ=";
     var encryptedData;
+    const firebaseConfig = {
+        apiKey: "AIzaSyBzbJNUII5kqc1xK4zxRt8q9_iRn90urlU",
+        authDomain: "disney-a2b9f.firebaseapp.com",
+        databaseURL: "https://disney-a2b9f-default-rtdb.firebaseio.com",
+        projectId: "disney-a2b9f",
+        storageBucket: "disney-a2b9f.appspot.com",
+        messagingSenderId: "940286922491",
+        appId: "1:940286922491:web:31b501d71f5335e97fea5e",
+        measurementId: "G-39LQM4FCFR"
+      };
+
+    firebase.initializeApp(firebaseConfig);
 
     function encryptAndDisplay() {
       var plainText = document.getElementById("data").value;
-      console.log(plainText);
 
       encryptedData = CryptoJS.AES.encrypt(plainText, secret).toString(); // Convert to string
 
@@ -53,7 +65,7 @@
       document.getElementById("m3").innerHTML = plainText;
     }
 
-    function saveEncryptedData() {
+    async function saveEncryptedData() {
       var fileName = document.getElementById("fileName").value;
       if (!fileName) {
         alert("Please enter a file name.");
@@ -61,39 +73,46 @@
       }
 
       fileName = "encrypted_data_" + fileName; // Add prefix to the file name
-
+      encryptAndDisplay()
       var blob = new Blob([encryptedData], { type: 'text/plain' });
-      var url = URL.createObjectURL(blob);
+      var storageRef = firebase.storage().ref(fileName+'.txt');
+      await storageRef.put(blob);
 
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = fileName + '.txt';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      alert("Encrypted data saved to Firebase Storage!");
     }
 
     function decryptFromFile() {
-      var input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.txt';
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.txt';
 
-      input.onchange = function (event) {
-        var file = event.target.files[0];
-        var reader = new FileReader();
+        input.onchange = async function (event) {
+          console.log("File selected");
 
-        reader.onload = function () {
-          var encryptedFromFile = reader.result;
-          var decrypted = CryptoJS.AES.decrypt(encryptedFromFile, secret).toString(CryptoJS.enc.Utf8);
-          document.getElementById("m2").innerHTML = decrypted;
+          var file = event.target.files[0];
+          console.log("Selected file:", file);
+
+          var storageRef = firebase.storage().ref().child(file.name);
+          console.log("Storage reference:", storageRef);
+
+          storageRef.getDownloadURL().then(async function (url) {
+            var response = await fetch(url);
+            var encryptedFromFile = await response.text();
+
+            console.log("Downloaded content:", encryptedFromFile);
+
+            var decrypted = CryptoJS.AES.decrypt(encryptedFromFile, secret).toString(CryptoJS.enc.Utf8);
+            console.log("Decrypted content:", decrypted);
+
+            document.getElementById("m2").innerHTML = decrypted;
+          }).catch(function (error) {
+            console.error("Error getting download URL:", error);
+          });
         };
 
-        reader.readAsText(file);
-      };
+        input.click();
+      }
 
-      input.click();
-    }
   </script>
 </body>
 

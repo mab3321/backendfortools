@@ -19,7 +19,7 @@ schema = [
 ]
 
 # Define the BigQuery client
-client = bigquery.Client(project='disney-a2b9f')
+client = bigquery.Client(project='propane-surfer-408115')
 
 # Define the dataset and table IDs
 dataset_id = 'tools'
